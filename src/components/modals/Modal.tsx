@@ -12,9 +12,9 @@ interface ModalProps {
     body?: React.ReactElement;
     footer?: React.ReactElement;
     actionLabel: string;
-    disable?: boolean;
+    disabled?: boolean;
     secondaryAction?: () => {};
-    secondaryLable?: string;
+    secondaryActionLable?: string;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -25,9 +25,9 @@ const Modal: React.FC<ModalProps> = ({
     body,
     footer,
     actionLabel,
-    disable,
+    disabled,
     secondaryAction,
-    secondaryLable
+    secondaryActionLable
 }) => {
     const [ showModal, setShowModal ] = useState(isOpen);
 
@@ -36,31 +36,31 @@ const Modal: React.FC<ModalProps> = ({
     },[isOpen]);
 
     const handleClose = useCallback(() => {
-        if (disable) {
-            return null;
+        if (disabled) {
+          return;
         }
-
+      
         setShowModal(false);
         setTimeout(() => {
-            onClose();
-        },300);
-    },[ disable, onClose]);
+          onClose();
+        }, 300)
+      }, [onClose, disabled]);
 
-    const handleSubmit = useCallback(() => {
-        if (disable) {
-            return ;
+      const handleSubmit = useCallback(() => {
+        if (disabled) {
+          return;
         }
-
+    
         onSubmit();
-    },[ disable, onSubmit]);
+      }, [onSubmit, disabled]);
 
-    const handleSecondaryAction = useCallback(() => {
-        if (disable || !secondaryAction ) {
-            return ;
+      const handleSecondaryAction = useCallback(() => {
+        if (disabled || !secondaryAction) {
+          return;
         }
-
+    
         secondaryAction();
-    },[ disable, secondaryAction]);
+      }, [secondaryAction, disabled]);
 
     if (!isOpen) {
         return null;
@@ -88,8 +88,11 @@ const Modal: React.FC<ModalProps> = ({
                             {/*  FOOTER */}
                             <div className=' flex flex-col gap-2 p-6'>
                                 <div className=' flex flex-row items-center gap-4 w-full'>
+                                    {secondaryAction && secondaryActionLable && (
+                                        <Button outline disabled={disabled} label={secondaryActionLable} onClick={handleSecondaryAction} />
+                                    )}
                                     <Button 
-                                        disabled={disable}
+                                        disabled={disabled}
                                         label={actionLabel}
                                         onClick={handleSubmit}
                                      />
