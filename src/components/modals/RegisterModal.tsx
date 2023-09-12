@@ -11,9 +11,16 @@ import Heading from "../Heading";
 import Input from "../inputs/Input";
 import { toast } from "react-hot-toast";
 import Button from "../Button";
+import useLoginModal from "@/hooks/useLoginModal";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "@/redux/store";
+import { registerUser } from "@/redux/feautres/auth.slice";
+// import { User } from "@/redux/feautres/auth.slice";
 
 const RegisterModal = () => {
+    const dispatch = useDispatch<AppDispatch>();
     const registerModal = useRegisterModal();
+    const loginModal = useLoginModal();
     const [ isLoading, setIsLoading ] = useState(false);
 
     const {
@@ -30,20 +37,35 @@ const RegisterModal = () => {
         }
     });
 
+    const onToggle = useCallback(() => {
+      registerModal.onClose();
+      loginModal.onOpen();
+    }, [registerModal, loginModal]);
+
     const onSubmit: SubmitHandler<FieldValues> = (data) => {
-        setIsLoading(true);
-    
-        axios.post('/api/register', data)
-        .then(() => {
-          registerModal.onClose();
-        })
-        .catch((error) => {
-          // console.log(error);
-          toast.error('Something Went Wrong !')
-        })
-        .finally(() => {
-          setIsLoading(false);
-        })
+        const { username, email, password } = data;
+        console.log("data : ", data);
+        dispatch(registerUser({ username, email, password }))
+          .unwrap()
+          .then(() => {
+            console.log("you are register in");
+            registerModal.onClose();
+            setIsLoading(false);
+            // window.location.reload();
+
+          })
+          .catch(() => {
+            console.log("ther is a problem here .");
+            setIsLoading(false);
+          });
+        // dispatch(register({ username, email, password }))
+        //   .unwrap()
+        //   .then(() => {
+        //     console.log("then : ")
+        //   })
+        //   .catch(() => {
+        //     console.log("catch : ")
+        //   });
       }
 
       const bodyContent = (
@@ -58,8 +80,8 @@ const RegisterModal = () => {
               required
             />
             <Input
-              id="name"
-              label="Name"
+              id="username"
+              label="UserName"
               disabled={isLoading}
               register={register}
               errors={errors}
@@ -92,10 +114,10 @@ const RegisterModal = () => {
             icon={AiFillGithub}
             onClick={() => {}}
            />
-           <div className=" text-neutral-500 text-center mt-4 font-light">
+           <div className=" text-neutral-400 text-center mt-4 font-light">
               <div className=" justify-center flex flex-row items-center gap-2">
                   <div>Already have an account!</div>
-                  <div onClick={registerModal.onClose} className=" text-neutral-800 cursor-pointer hover:underline">Login</div>
+                  <div onClick={onToggle} className=" text-neutral-800 cursor-pointer hover:underline">Login</div>
               </div>
            </div>
         </div>
